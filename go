@@ -150,6 +150,11 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
     if [ -f $GO_ALIAS_FILE ]; then
         source $GO_ALIAS_FILE
     fi
+
+    # add bb completion
+    if [ `type -t _bitbake` == "function" ]; then
+        complete -F _bitbake bb
+    fi
 else
     echo "Already in go shell"
 fi
