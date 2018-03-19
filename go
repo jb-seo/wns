@@ -100,6 +100,35 @@ function bb() {
 	trap - SIGINT
 }
 
+function btail() {
+	trap 'continue' SIGINT
+	if [ $# -eq 0 ]; then
+		echo "Usage {# btail component (command: default = compile)}"
+		echo "\te.g. '# btail qtbase configure'"
+		return 1;
+	fi
+	pushd . &> /dev/null
+	PROJECT=$1
+	COMMAND=$2
+	if [ "$COMMAND" == "" ]; then
+		COMMAND="compile"
+	fi
+	RET=1
+	goto $PROJECT
+	if [ $? -eq 0 ]; then
+		FILE="temp/log.do_${COMMAND}"
+		if [ -f $FILE ]; then
+			tail -f ./${FILE}
+			RET=0
+		else
+			echo "[ERROR] Can't find '${COMMAND}' command file. Please to bitbake job first."
+		fi
+	fi
+	popd &> /dev/null
+	trap - SIGINT
+	return ${RET}
+}
+
 function @add() {
 	NAME=$1
 	if [ "${NAME:0:1}" == "@" ]; then
@@ -160,9 +189,10 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
 		source $GO_ALIAS_FILE
 	fi
 
-	# add bb completion
+	# add bb/btail completion
 	if [ `type -t _bitbake` == "function" ]; then
 		complete -F _bitbake bb
+		complete -F _bitbake btail
 	fi
 else
 	echo "Already in go shell"
