@@ -107,7 +107,7 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
 
     # PS1
     export PS1="${BASH_BRed}RPi3 ${BASH_BBlue}\w${BASH_BGreen}\$(__git_ps1 \" [%s]\")${BASH_Color_Off} \$ "
-    export PROMPT_DIRTRIM=3
+    export PROMPT_DIRTRIM=2
 
     # set aliases
     alias @base="cd $WEBOS_BASE_DIR"
