@@ -1,5 +1,10 @@
 #!/bin/bash
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+GREENB='\033[1;32m'
+NC='\033[0m'
+
 function goToLastUpdatedVersion() {
     DESTDIR=$1
     for VERSION in `ls ${DESTDIR} -t`
@@ -17,11 +22,6 @@ function goto() {
         echo "Please specify the component name"
         return 0;
     fi
-
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    GREENB='\033[1;32m'
-    NC='\033[0m'
 
     PROJECT=$1
     WORKDIR="${BUILDDIR}/work"
@@ -100,6 +100,38 @@ function bb() {
     trap '' SIGINT
 }
 
+function @add() {
+   NAME=$1
+   if [ "${NAME:0:1}" == "@" ]; then
+       echo -e "${RED}Don't use '@' as first character.${NC}"
+       return 1
+   fi
+
+   EXIST=`alias @${NAME} 2> /dev/null`
+   if [ $? -eq 0 ]; then
+       echo -e "${RED}Already exist...${NC}"
+       return 1
+   fi
+
+   # replace to relational dir if it is a child dir
+   CMD="alias @${NAME}='cd ${PWD/${WEBOS_BASE_DIR}/\$\{WEBOS_BASE_DIR\}}'"
+   eval $CMD
+   echo $CMD >> $GO_ALIAS_FILE
+   return 0
+}
+
+function @del() {
+   NAME=$1
+   EXIST=`alias @${NAME} 2> /dev/null`
+   if [ $? -ne 0 ]; then
+       echo -e "${RED}Doesn't exist...${NC}"
+       return 1
+   fi
+
+   eval "unalias @${NAME}"
+   sed -i "/@${NAME}=/d" $GO_ALIAS_FILE
+}
+
 if [ "$WEBOS_BASE_DIR" == "" ]; then
     export WEBOS_BASE_DIR=$PWD
     source ~/.bashrc
@@ -112,6 +144,12 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
     # set aliases
     alias @base="cd $WEBOS_BASE_DIR"
     alias @sysroot="cd ${WEBOS_BASE_DIR}/BUILD/sysroots/${MACHINE}"
+
+    # load saved aliases
+    export GO_ALIAS_FILE="${WEBOS_BASE_DIR}/.go_aliases"
+    if [ -f $GO_ALIAS_FILE ]; then
+        source $GO_ALIAS_FILE
+    fi
 else
     echo "Already in go shell"
 fi
