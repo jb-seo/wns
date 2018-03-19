@@ -184,7 +184,7 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
 	alias @sysroot="cd \${WEBOS_BASE_DIR}/BUILD/sysroots/${MACHINE}"
 
 	# load saved aliases
-	export GO_ALIAS_FILE="${WEBOS_BASE_DIR}/.go_aliases"
+	export GO_ALIAS_FILE="${WEBOS_BASE_DIR}/.wns_aliases"
 	if [ -f $GO_ALIAS_FILE ]; then
 		source $GO_ALIAS_FILE
 	fi
@@ -195,5 +195,5 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
 		complete -F _bitbake btail
 	fi
 else
-	echo "Already in go shell"
+	echo "Already in WNS(webOS navigation shell)"
 fi
