@@ -19,7 +19,8 @@ function goto() {
     fi
 
     RED='\033[0;31m'
-    GREEN='\033[1;32m'
+    GREEN='\033[0;32m'
+    GREENB='\033[1;32m'
     NC='\033[0m'
 
     PROJECT=$1
@@ -40,6 +41,8 @@ function goto() {
         for DIR in $CANDIDATES
         do
             if [[ "$DIR" == */${PROJECT} ]]; then
+                echo -e "${GREENB}${x}${NC}: ${DIR}"
+            elif [[ "$DIR" == *${PROJECT} ]]; then
                 echo -e "${GREEN}${x}${NC}: ${DIR}"
             else
                 echo "${x}: ${DIR}"
