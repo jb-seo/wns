@@ -111,8 +111,7 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
 
     # set aliases
     alias @base="cd $WEBOS_BASE_DIR"
-    alias @work="cd ${WEBOS_BASE_DIR}/BUILD/work"
-    alias @sysroot="cd ${WEBOS_BASE_DIR}/BUILD/sysroots"
+    alias @sysroot="cd ${WEBOS_BASE_DIR}/BUILD/sysroots/${MACHINE}"
 else
     echo "Already in go shell"
 fi
