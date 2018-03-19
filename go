@@ -87,7 +87,7 @@ function oe() {
         fi
     fi
     popd &> /dev/null
-    trap '' SIGINT
+    trap - SIGINT
     return ${RET}
 }
 
@@ -97,7 +97,7 @@ function bb() {
     cd $WEBOS_BASE_DIR
     bitbake $@
     popd &> /dev/null
-    trap '' SIGINT
+    trap - SIGINT
 }
 
 function @add() {
