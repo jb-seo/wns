@@ -132,6 +132,15 @@ function @del() {
    sed -i "/@${NAME}=/d" $GO_ALIAS_FILE
 }
 
+function @list() {
+   alias | \
+       grep @ | \
+       sed "s/='cd / /g" | \
+       sed "s/'//g" | \
+       sed "s/\${WEBOS_BASE_DIR}/\$/g" | \
+       awk '{ printf("%-10s %s\n",$2,$3) }'
+}
+
 if [ "$WEBOS_BASE_DIR" == "" ]; then
     export WEBOS_BASE_DIR=$PWD
     source ~/.bashrc
@@ -142,8 +151,8 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
     export PROMPT_DIRTRIM=2
 
     # set aliases
-    alias @base="cd $WEBOS_BASE_DIR"
-    alias @sysroot="cd ${WEBOS_BASE_DIR}/BUILD/sysroots/${MACHINE}"
+    alias @base="cd \${WEBOS_BASE_DIR}"
+    alias @sysroot="cd \${WEBOS_BASE_DIR}/BUILD/sysroots/${MACHINE}"
 
     # load saved aliases
     export GO_ALIAS_FILE="${WEBOS_BASE_DIR}/.go_aliases"
