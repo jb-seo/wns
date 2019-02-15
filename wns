@@ -1,5 +1,10 @@
 #!/bin/bash
 
+BASH_BRed='\[\033[01;31m\]'
+BASH_BGreen='\[\033[01;32m\]'
+BASH_BBlue='\[\033[01;34m\]'
+BASH_Color_Off='\[\033[00m\]'
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 GREENB='\033[1;32m'
