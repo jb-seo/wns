@@ -150,7 +150,7 @@ function @add() {
 	# replace to relational dir if it is a child dir
 	CMD="alias @${NAME}='cd ${PWD/${WEBOS_BASE_DIR}/\$\{WEBOS_BASE_DIR\}}'"
 	eval $CMD
-	echo $CMD >> $GO_ALIAS_FILE
+	echo $CMD >> $GO_CONFIG_FILE
 	return 0
 }
 
@@ -163,7 +163,7 @@ function @del() {
 	fi
 
 	eval "unalias @${NAME}"
-	sed -i "/@${NAME}=/d" $GO_ALIAS_FILE
+	sed -i "/@${NAME}=/d" $GO_CONFIG_FILE
 }
 
 function @list() {
@@ -180,19 +180,27 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
 	source ~/.bashrc
 	source ./oe-init-build-env
 
+	# load config
+	export GO_CONFIG_FILE="${WEBOS_BASE_DIR}/.wns_config"
+	if [ -f $GO_CONFIG_FILE ]; then
+		source $GO_CONFIG_FILE
+	else
+		echo -en "Shell nickname [webOS]: " && read nick
+		if [ "$nick" == "" ]; then
+			export PROMPT_NICK="webOS"
+		else
+			export PROMPT_NICK="$nick"
+		fi
+		echo "export PROMPT_NICK=$PROMPT_NICK" > $GO_CONFIG_FILE
+	fi
+
 	# PS1
-	export PS1="${BASH_BRed}RPi3 ${BASH_BBlue}\w${BASH_BGreen}\$(__git_ps1 \" [%s]\")${BASH_Color_Off} \$ "
+	export PS1="${BASH_BRed}${PROMPT_NICK} ${BASH_BBlue}\w${BASH_BGreen}\$(__git_ps1 \" [%s]\")${BASH_Color_Off} \$ "
 	export PROMPT_DIRTRIM=2
 
 	# set aliases
 	alias @base="cd \${WEBOS_BASE_DIR}"
 	alias @sysroot="cd \${WEBOS_BASE_DIR}/BUILD/sysroots/${MACHINE}"
-
-	# load saved aliases
-	export GO_ALIAS_FILE="${WEBOS_BASE_DIR}/.wns_aliases"
-	if [ -f $GO_ALIAS_FILE ]; then
-		source $GO_ALIAS_FILE
-	fi
 
 	# add bb/btail completion
 	if [ `type -t _bitbake` == "function" ]; then
