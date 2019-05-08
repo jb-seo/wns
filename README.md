@@ -17,4 +17,3 @@ It's a simple navigation tool for webOS (OSE) - <https://github.com/webosose/bui
 6. @del {key} : delete added shortcut
 7. @list : list added shortcuts
 8. @base : cd to build-webos root
-9. @sysroot : cd to target board's sysroot

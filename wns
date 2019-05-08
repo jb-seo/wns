@@ -207,7 +207,6 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
 
 	# set aliases
 	alias @base="cd \${WEBOS_BASE_DIR}"
-	alias @sysroot="cd \${WEBOS_BASE_DIR}/BUILD/sysroots/${MACHINE}"
 
 	# add bb/btail completion
 	if [ ! -e `type -t _bitbake` ]; then
