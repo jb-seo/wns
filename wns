@@ -178,7 +178,14 @@ function @list() {
 if [ "$WEBOS_BASE_DIR" == "" ]; then
 	export WEBOS_BASE_DIR=$PWD
 	source ~/.bashrc
-	source ./oe-init-build-env
+
+	# check build environment first
+	if [ -f ./oe-init-build-env ]; then
+		source ./oe-init-build-env
+	else
+		echo -e "${RED}No 'oe-init-build-env' file. Please run ./mcf first${NC}"
+		exit 1
+	fi
 
 	# load config
 	export GO_CONFIG_FILE="${WEBOS_BASE_DIR}/.wns_config"
@@ -208,5 +215,6 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
 		complete -F _bitbake btail
 	fi
 else
-	echo "Already in WNS(webOS navigation shell)"
+	echo -e "${GREEN}Already in WNS(webOS navigation shell)${NC}"
+	exit 0
 fi
