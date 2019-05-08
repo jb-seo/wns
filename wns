@@ -203,7 +203,7 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
 	alias @sysroot="cd \${WEBOS_BASE_DIR}/BUILD/sysroots/${MACHINE}"
 
 	# add bb/btail completion
-	if [ `type -t _bitbake` == "function" ]; then
+	if [ ! -e `type -t _bitbake` ]; then
 		complete -F _bitbake bb
 		complete -F _bitbake btail
 	fi
