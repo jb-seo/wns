@@ -176,7 +176,7 @@ function @del() {
 
 function @list() {
 	alias | \
-		grep @ | \
+		grep " @" | \
 		sed "s/='cd / /g" | \
 		sed "s/'//g" | \
 		sed "s/\${WEBOS_BASE_DIR}/\$/g" | \
