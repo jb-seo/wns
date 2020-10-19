@@ -47,9 +47,17 @@ function goto() {
 		for DIR in $CANDIDATES
 		do
 			if [[ "$DIR" == */${PROJECT} ]]; then
+				goToLastUpdatedVersion "${WORKDIR}/${DIR}"
+				return 0
+			fi
+		done
+
+		for DIR in $CANDIDATES
+		do
+			if [[ "$DIR" == */*${PROJECT} ]]; then
 				echo -e "${GREENB}${x}${NC}: ${DIR}"
 				candi=$x
-			elif [[ "$DIR" == *${PROJECT} ]]; then
+			elif [[ "$DIR" == */${PROJECT}* ]]; then
 				echo -e "${GREEN}${x}${NC}: ${DIR}"
 				if [ ${candi} -eq 0 ]; then
 					candi=$x
@@ -76,6 +84,36 @@ function goto() {
 		echo -e "${RED}Wrong choice...${NC}"
 		return 1
 	fi
+}
+
+function icp() {
+	trap 'continue' SIGINT
+	if [ $# -lt 2 ]; then
+		echo "Usage {# icp component target (ipkType)} e.g. '# icp search auto:'"
+		return 1;
+	fi
+	pushd . &> /dev/null
+	PROJECT=$1
+	TARGET=$2
+	WHICHIPK=$3
+	RET=0
+	goto $PROJECT
+	if [ $? -eq 0 ]; then
+		cd deploy-ipks/*
+		if [ $? -eq 0 ]; then
+			if [ "$WHICHIPK" == "" ]; then
+				IPK=`ls | sort | head -n 1`
+			else
+				IPK=`ls *${WHICHIPK}* 2> /dev/null | sort | head -n 1`
+			fi
+			if [ "$IPK" != "" ] && [ -f $IPK ]; then
+				scp $IPK $TARGET
+			fi
+		fi
+	fi
+	popd &> /dev/null
+	trap - SIGINT
+	return ${RET}
 }
 
 function oe() {
@@ -142,6 +180,77 @@ function btail() {
 	return ${RET}
 }
 
+function bedit() {
+	if [ $# -eq 0 ]; then
+		echo "Usage {# bedit component (all, without this choose last layer)}"
+		echo "\te.g. '# bedit account all'"
+		return 1;
+	fi
+	PROJECT=$1
+	COMMAND=$2
+	SEARCHALL=0
+	if [ "$COMMAND" == "all" ]; then
+		SEARCHALL=1
+	fi
+	RET=1
+	LAYERS=`sed 's/ ?= /=/' $WEBOS_BASE_DIR/conf/bblayers.conf | grep "^META" | grep meta-lg-webos`
+	CANDIDATES=()
+	x=0
+	for i in $LAYERS
+	do
+		DIR=${i/*=\"\$\{TOPDIR\}\//}
+		DIR=${DIR/\"/}
+		pushd ${WEBOS_BASE_DIR} &> /dev/null
+		COUNT=`find $DIR -type f -name "*$PROJECT*.bb*" | wc -l`
+		FILES=`find $DIR -type f -name "*$PROJECT*.bb*"`
+		popd &> /dev/null
+		if [ $COUNT -eq 0 ]; then
+			continue;
+		elif [ $COUNT -eq 1 ]; then
+			x=$(( $x + 1 ))
+			if [ $SEARCHALL -eq 0 ]; then
+				FILE=$FILES
+				break;
+			else
+				CANDIDATES+=($FILES)
+			fi
+		else
+			x=$(( $x + $COUNT ))
+			for j in $FILES
+			do
+				echo $j
+				CANDIDATES+=($j)
+			done
+		fi
+	done
+	if [ "$FILE" != "" ]; then
+		vi $WEBOS_BASE_DIR/$FILE
+	elif [ $x -gt 0 ]; then
+		y=1
+		for j in ${CANDIDATES[@]}
+		do
+			echo "${y}: ${j}"
+			y=$(( $y + 1 ))
+		done
+		echo -en "Choose one (default: 1) >> "
+		read -r SEL
+		if [ "$SEL" = "" ]; then
+			SEL=1
+		fi
+		FILE=${CANDIDATES[$(( $SEL - 1 ))]}
+		if [ "$FILE" != "" ]; then
+			vi $WEBOS_BASE_DIR/$FILE
+		fi
+	else
+		echo "No search result for '$PROJECT'"
+	fi
+	unset FILE
+	unset FILES
+	unset CANDIDATES
+	popd &> /dev/null
+	return ${RET}
+}
+
 function @add() {
 	NAME=$1
 	if [ "${NAME:0:1}" == "@" ]; then
@@ -175,8 +284,8 @@ function @del() {
 }
 
 function @list() {
-	alias | \
-		grep " @" | \
+	cat ${GO_CONFIG_FILE} | \
+		grep "alias" | \
 		sed "s/='cd / /g" | \
 		sed "s/'//g" | \
 		sed "s/\${WEBOS_BASE_DIR}/\$/g" | \
@@ -210,7 +319,7 @@ if [ "$WEBOS_BASE_DIR" == "" ]; then
 	fi
 
 	# PS1
-	export PS1="${BASH_BRed}${PROMPT_NICK} ${BASH_BBlue}\w${BASH_BGreen}\$(__git_ps1 \" [%s]\")${BASH_Color_Off} \$ "
+	export PS1="S-${BASH_BRed}${PROMPT_NICK} ${BASH_BBlue}\w${BASH_BGreen}\$(__git_ps1 \" [%s]\")${BASH_Color_Off} \$ "
 	export PROMPT_DIRTRIM=2
 
 	# set aliases
